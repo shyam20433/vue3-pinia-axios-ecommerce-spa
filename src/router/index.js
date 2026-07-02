@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import ProductView from '@/views/ProductView.vue'
 import cartsView from '@/views/cartsView.vue'
 import { carts } from '@/stores/carts.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 import manageProductView from '@/views/manageProductView.vue'
 const router = createRouter({
@@ -51,5 +52,9 @@ router.beforeEach((to) => {
     return { path: "/products" }
   }
 
+  const auth=useAuthStore()
+  if (to.path==='/manage' && !auth.isAdmin){
+  alert(`you arent admin !!!`)
+  }
 })
 export default router

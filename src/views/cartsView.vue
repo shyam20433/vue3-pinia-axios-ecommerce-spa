@@ -34,8 +34,21 @@ function back() {
             <td>{{ prod.name }}</td>
           </tr>
           <tr>
-            <th>Product Price</th>
+            <th>Product Price per unit</th>
             <td class="price">₹{{ prod.price }}</td>
+          </tr>
+          <tr>
+            <th>Product quantity</th>
+            <td class="price"><span>{{ prod.quantity }}</span></td>
+          </tr>
+          <tr>
+            <th>Total price</th>
+            <td class="price">₹{{ prod.price *prod.quantity }}</td>
+          </tr>
+
+          <tr>
+            <th><button @click="cart.increasequantity(prod.id)">increase</button></th>
+            <th><button @click="cart.decreasequantity(prod.id)">decrease</button></th>
           </tr>
           <tr>
             <td colspan="2" class="action-cell">
@@ -44,6 +57,7 @@ function back() {
           </tr>
         </table>
       </div>
+      <h1>total amount {{ cart.totalprice }}</h1>
     </div>
   </div>
 </template>

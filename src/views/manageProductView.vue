@@ -71,7 +71,7 @@ function clear(){
       <h3>{{ editIndex === -1 ? 'Add New Product' : 'Edit Product' }}</h3>
       <div class="form-group">
         <label for="prod-id">Product ID</label>
-        <input id="prod-id" type="text" v-model="id" required />
+        <input id="prod-id" type="number" v-model="id" required />
       </div>
 
       <div class="form-group">
@@ -81,7 +81,7 @@ function clear(){
 
       <div class="form-group">
         <label for="prod-price">Price (₹)</label>
-        <input id="prod-price" type="text" required v-model="price" />
+        <input id="prod-price" type="number" required v-model="price" />
       </div>
 
       <div class="form-group">
