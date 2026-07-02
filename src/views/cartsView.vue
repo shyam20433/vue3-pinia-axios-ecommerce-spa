@@ -57,7 +57,8 @@ function back() {
           </tr>
         </table>
       </div>
-      <h1>total amount {{ cart.totalprice }}</h1>
+      <h3>total amount : ₹ {{ cart.totalprice }}</h3>
+      <h3>total quantity : {{ cart.totalitems }}</h3>
     </div>
   </div>
 </template>

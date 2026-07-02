@@ -10,6 +10,11 @@ export const carts = defineStore('cart', {
       return state.cartItems.reduce((total,item)=>{
         return total+(item.price*item.quantity)
       },0);
+    },
+    totalitems:(state)=>{
+      return state.cartItems.reduce((total,item)=>{
+        return total+(item.quantity)
+      },0);
     }
   },
   actions: {
