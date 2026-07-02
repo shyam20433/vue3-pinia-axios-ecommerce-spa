@@ -1,5 +1,5 @@
 # E-Commerce Single Page Application (SPA)
-live~ https://shyampiniaoptionstore.vercel.app/
+live~ https://piniaecommerce.vercel.app
 
 A modern, responsive E-Commerce web application built using **Vue 3 (Composition API)**, **Vite**, **Vue Router**, and **Pinia** for centralized state management. This project was developed as part of the NGP Internship program.
 
