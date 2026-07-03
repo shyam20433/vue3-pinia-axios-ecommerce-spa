@@ -38,7 +38,7 @@ async function updateproduct() {
     image: image.value,
   }
   await apicall.updateproduct(id.value, product)
-  alert(`updated success fully  !!`)
+  alert(`updated successfully!`)
   get()
 }
 
@@ -166,7 +166,7 @@ function addtocart(prod) {
       </div>
     </div>
 
-    <div class="selected-card" v-if="auth.isLoggedIn && !auth.isAdmin && product.id">
+    <div class="selected-card" v-if="auth.isLoggedIn  && product.id">
       <h2>Selected Product</h2>
 
       <img :src="product.image" :alt="product.name" class="product-image" />

@@ -1,6 +1,12 @@
 {
   "products": [
     {
+      "name": "phone",
+      "price": 15000,
+      "image": "https://i.pinimg.com/1200x/c7/2a/eb/c72aeb2719effad574365505f2f16e26.jpg",
+      "id": 1
+    },
+    {
       "id": 2,
       "image": "https://i.pinimg.com/1200x/de/ad/e6/deade6c3f65c0c5d48914fab1e5a8ab4.jpg",
       "name": "laptop",
@@ -31,27 +37,43 @@
       "price": 600
     }
   ],
-  "carts": [
+  "orders": [
     {
-      "id": 6,
-      "name": "laptop bag",
-      "price": 600,
-      "image": "https://i.pinimg.com/736x/a2/1d/84/a21d84942ac25117d51bf312bdb7f9a3.jpg",
-      "quantity": 1
+      "user": {
+        "username": "shyam",
+        "role": "user",
+        "id": 2
+      },
+      "items": [
+        {
+          "id": 2,
+          "image": "https://i.pinimg.com/1200x/de/ad/e6/deade6c3f65c0c5d48914fab1e5a8ab4.jpg",
+          "name": "laptop",
+          "price": 150000,
+          "quantity": 2
+        }
+      ],
+      "totalItems": 2,
+      "totalPrice": 300000,
+      "orderDate": "7/3/2026, 5:02:19 PM",
+      "id": 1
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "shyamsundar",
+      "role": "admin"
     },
     {
-      "id": 3,
-      "name": "powerbank",
-      "price": 999,
-      "image": "https://i.pinimg.com/736x/20/69/0d/20690dd093157ed7a3786add6903ade5.jpg",
-      "quantity": 1
+      "username": "shyam",
+      "role": "user",
+      "id": 2
     },
     {
-      "id": 4,
-      "name": "headphone",
-      "price": 500,
-      "image": "https://i.pinimg.com/736x/ae/79/08/ae79083e5ae4dacaedfbc804fadd75c4.jpg",
-      "quantity": 1
+      "username": "sundar",
+      "role": "user",
+      "id": 3
     }
   ]
 }

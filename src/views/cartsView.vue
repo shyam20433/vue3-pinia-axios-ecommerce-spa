@@ -4,6 +4,8 @@ import backBtn from '@/components/backBtn.vue';
 import router from '@/router';
 import removeCrtBtn from '@/components/removeCrtBtn.vue';
 import { ref,computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+const auth=useAuthStore()
 const cart = carts()
 const search = ref("")
 const sortby=ref('default')
@@ -34,6 +36,28 @@ const filteredProducts=computed(()=>{
 
   )
 })
+
+import apicall from "@/services/server";
+
+async function placeOrder() {
+  if (cart.cartItems.length===0){
+    alert(`cart is empty cant place order !`)
+    return
+  }
+  const order = {
+    user:auth.currentUser,
+    items: cart.cartItems,
+    totalItems: cart.totalitems,
+    totalPrice: cart.totalprice,
+    orderDate: new Date().toLocaleString()
+  };
+
+  await apicall.placeOrder(order);
+
+  alert("Order Placed Successfully");
+
+  cart.clearcart();
+}
 
 </script>
 
@@ -95,6 +119,7 @@ const filteredProducts=computed(()=>{
       </div>
       <h3>total amount : ₹ {{ cart.totalprice }}</h3>
       <h3>total quantity : {{ cart.totalitems }}</h3>
+      <button @click="placeOrder">Place Order</button>
     </div>
   </div>
 </template>

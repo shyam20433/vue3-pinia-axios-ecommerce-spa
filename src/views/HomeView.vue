@@ -1,10 +1,12 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
+import apicall from '@/services/server';
+
 
 const auth = useAuthStore()
 const name = ref('')
-
+/*
 function addadmin(adminValue) {
   auth.login({
     username: adminValue,
@@ -17,6 +19,63 @@ function adduser(userValue) {
     username: userValue,
     role: 'user'
   })
+} */
+
+async function adduser(){
+
+  if(!name.value.trim()){
+    alert("Enter username")
+    return
+  }
+
+  const users = await apicall.getUserByName(name.value)
+
+  const exists = users[0]
+
+  if(exists){
+
+    auth.login(exists)
+
+    alert("Logged in successfully")
+
+  }else{
+
+    const newUser = {
+      username:name.value,
+      role:"user"
+    }
+
+    await apicall.adduser(newUser)
+
+    auth.login(newUser)
+
+    alert("Signup Successfully")
+  }
+
+}
+async function addadmin(){
+
+  if(!name.value.trim()){
+    alert("Enter username")
+    return
+  }
+
+  const users = await apicall.getUserByName(name.value)
+
+  const exists = users.find(user => user.role==="admin")
+
+  if(exists){
+
+      auth.login(exists)
+
+      alert("Admin Logged In")
+
+  }else{
+
+      alert("Admin not found")
+
+  }
+
 }
 </script>
 
@@ -27,8 +86,8 @@ function adduser(userValue) {
 
     <label>select your role</label>
     <div class="button-group">
-      <button class="btn-user" @click="adduser(name)">user</button>
-      <button class="btn-admin" @click="addadmin(name)">admin</button>
+      <button class="btn-user" @click="adduser">user</button>
+      <button class="btn-admin" @click="addadmin">admin</button>
     </div>
   </div>
 </template>

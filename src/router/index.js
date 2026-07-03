@@ -5,6 +5,7 @@ import cartsView from '@/views/cartsView.vue'
 import { carts } from '@/stores/carts.js'
 import { useAuthStore } from '@/stores/auth.js'
 import productApi from '@/views/productApi.vue'
+import ordersView from '@/views/ordersView.vue'
 
 import manageProductView from '@/views/manageProductView.vue'
 const router = createRouter({
@@ -30,6 +31,11 @@ const router = createRouter({
       path: '/manage',
       name: 'manage',
       component: manageProductView,
+    },
+    {
+      path: '/orders',
+      name: 'order',
+      component: ordersView,
     },
     {
       path: '/about',
@@ -58,7 +64,7 @@ router.beforeEach((to) => {
 
     alert("Please add a items to the cart first!")
 
-    return { path: "/products" }
+    return { path: "/productapi" }
   }
 
   const auth=useAuthStore()
