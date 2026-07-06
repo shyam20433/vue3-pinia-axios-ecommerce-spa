@@ -14,13 +14,16 @@ const auth = useAuthStore();
       <!-- <li>
         <RouterLink to="/products" v-if=" auth.isLoggedIn && !auth.isAdmin">Products</RouterLink>
       </li> -->
-
+<li>
+        <RouterLink to="/productapi" >Product Api</RouterLink>
+      </li>
       <li>
         <RouterLink to="/carts" v-if=" auth.isLoggedIn && !auth.isAdmin">Cart</RouterLink>
       </li>
       <li>
-        <RouterLink to="/productapi" >Product Api</RouterLink>
+        <RouterLink to="/myorders" v-if=" auth.isLoggedIn && !auth.isAdmin">MyOrders</RouterLink>
       </li>
+
 
 
       <li v-if="auth.isAdmin">

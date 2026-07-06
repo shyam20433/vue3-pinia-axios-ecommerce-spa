@@ -137,7 +137,7 @@ function addtocart(prod) {
       </div>
     </v-card>
 
-    //seelected product
+   <!--  //selected product -->
 
     <v-card
       v-if="auth.isLoggedIn && product.length !== 0"
@@ -170,7 +170,7 @@ function addtocart(prod) {
       </v-card-text>
     </v-card>
 
-    //product list
+    <!-- //product list -->
 
     <v-row>
       <v-col v-for="prod in products" :key="prod.id" cols="12" sm="6" md="4" lg="3">
@@ -209,7 +209,7 @@ function addtocart(prod) {
             </v-btn>
           </v-card-actions>
 
-      
+
 
           <div v-if="auth.isAdmin" class="pa-3">
             <apiAdminControlBtn @edit="editProduct(prod)" @delete="deleteProduct(prod.id)" />

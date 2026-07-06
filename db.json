@@ -104,27 +104,6 @@
       "totalPrice": 30000,
       "orderDate": "7/6/2026, 9:28:07 AM",
       "id": 4
-    },
-    {
-      "userId": 2,
-      "user": {
-        "username": "shyam",
-        "role": "user",
-        "id": 2
-      },
-      "items": [
-        {
-          "id": 2,
-          "image": "https://i.pinimg.com/1200x/de/ad/e6/deade6c3f65c0c5d48914fab1e5a8ab4.jpg",
-          "name": "laptop",
-          "price": 150000,
-          "quantity": 0
-        }
-      ],
-      "totalItems": 0,
-      "totalPrice": 0,
-      "orderDate": "7/6/2026, 10:17:19 AM",
-      "id": 5
     }
   ],
   "users": [
@@ -147,6 +126,11 @@
       "username": "wertyui",
       "role": "user",
       "id": 4
+    },
+    {
+      "username": "kishore",
+      "role": "user",
+      "id": 5
     }
   ]
 }

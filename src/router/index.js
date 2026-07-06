@@ -7,7 +7,10 @@ import { useAuthStore } from '@/stores/auth.js'
 import productApi from '@/views/productApi.vue'
 import ordersView from '@/views/ordersView.vue'
 
+
 import manageProductView from '@/views/manageProductView.vue'
+import MyOrders from '@/views/myOrders.vue'
+import apicall from '@/services/server.js'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -46,6 +49,11 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
+  path: '/myorders',
+  name: 'myorders',
+  component: MyOrders
+},
+    {
       path: '/productapi',
       name: 'productapi',
       // route level code-splitting
@@ -56,7 +64,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async(to) => {
 
   const cart = carts()
 
@@ -69,7 +77,21 @@ router.beforeEach((to) => {
 
   const auth=useAuthStore()
   if (to.path==='/manage' && !auth.isAdmin){
+    console.log(`manage checking`)
   alert(`you arent admin !!!`)
-  }
+  return {path:"/"}}
+
+
+  if(to.path==="/myorders" ){
+    if (!auth.currentUser) {
+      alert("Please login first!")
+      return { path: "/" }
+    }
+    const orders=await apicall.getOrders()
+    const myOrders=orders.filter(order=>order.user?.id===auth.currentUser.id)
+    if (myOrders.length===0){
+    alert("No orders")
+    return {path:"/productapi"}
+  }}
 })
 export default router
