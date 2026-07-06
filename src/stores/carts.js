@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "./auth";
 
+
 export const carts = defineStore('cart', {
   state: () => ({
     cartItems:[]
@@ -19,6 +20,10 @@ export const carts = defineStore('cart', {
     }
   },
   actions: {
+
+
+
+
     getcartkey(){
       const auth=useAuthStore();
       if(!auth.currentUser){
@@ -34,12 +39,12 @@ export const carts = defineStore('cart', {
       }
       this.cartItems=JSON.parse(localStorage.getItem(key))||[];
     },
-    savecart(){
+    /* savecart(){
       const key=this.getcartkey()
       if(key){
         localStorage.setItem(key,JSON.stringify(this.cartItems))
       }
-    },
+    }, */
 
 
 
@@ -57,13 +62,14 @@ export const carts = defineStore('cart', {
       localStorage.setItem("cart",JSON.stringify(this.cartItems))
       alert(`${products.name} added`)
     }
-  this.savecart()},
+  //this.savecart()
+},
 
     delcart(index){
       this.cartItems.splice(index,1)
       localStorage.setItem("cart",JSON.stringify(this.cartItems))
       alert(`product removed from the cart`)
-      this.savecart()
+      //this.savecart()
     },
     clearcart(){
       const key=this.getcartkey()
@@ -79,7 +85,7 @@ export const carts = defineStore('cart', {
         exits.quantity++;
       }
       localStorage.setItem("carts",JSON.stringify(this.cartItems))
-      this.savecart()
+      //this.savecart()
 
     },
     decreasequantity(id){
@@ -94,7 +100,7 @@ export const carts = defineStore('cart', {
           this.cartItems.splice(id.index,1)
         }
       }
-      this.savecart()
+      //this.savecart()
     },
     resetcart(){
       this.cartItems=[];
