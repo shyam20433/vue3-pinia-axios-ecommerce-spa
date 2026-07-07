@@ -17,7 +17,7 @@ function del(index) {
   cart.delcart(index)
 }
 function back() {
-  router.push('/products')
+  router.push('/productapi')
 }
 
 const sortedproducts = computed(() => {
@@ -58,9 +58,14 @@ async function placeOrder() {
 
   cart.clearcart()
 }
+
+
+
+
 </script>
 
 <template>
+
   <div class="cart-container">
     <backBtn @back="back" />
     <div class="search-container">

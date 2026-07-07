@@ -1,32 +1,40 @@
 import axios from "axios";
-
 const api = axios.create({
   baseURL: 'http://localhost:8080'
 }
 )
-api.interceptors.request.use((config)=>{
+api.interceptors.request.use((config) => {
   console.log("------request interceptor------")
-  console.log("method : ",config.method)
-  console.log("Url : ",config.url)
+  console.log("method : ", config.method)
+  console.log("Url : ", config.url)
 
   return config
-},(error)=>{
+}, (error) => {
   return Promise.reject(error)
 }
 )
 
-api.interceptors.response.use((response)=>{
+
+
+api.interceptors.response.use((response) => {
   console.log("------response interceptor------")
-  console.log("Status : ",response.status)
-  
+  console.log("Status : ", response.status)
+
 
   return response
-},(error)=>{
+}, (error) => {
   return Promise.reject(error)
 }
 )
 
 const apicall = {
+
+  async searchProducts(search) {
+    const response = await api.get('/products')
+
+
+    return response.data.filter((prod)=>prod.name.toLowerCase().includes(search.toLowerCase()))
+  },
   async getproducts() {
     const data = await api.get('/products')
     return data.data
@@ -72,8 +80,8 @@ const apicall = {
     return res.data;
   },
 
-    //orders
-    async placeOrder(order) {
+  //orders
+  async placeOrder(order) {
     const res = await api.post("/orders", order);
     return res.data;
   },
@@ -82,29 +90,29 @@ const apicall = {
     const res = await api.get("/orders");
     return res.data;
   },
-  async delOrder(id){
-    const res=await api.delete(`/orders/${id}`)
+  async delOrder(id) {
+    const res = await api.delete(`/orders/${id}`)
     return res.data
   },
 
 
   //useraccount
 
-  async adduser(user){
-    const data=await api.post('/users',user)
+  async adduser(user) {
+    const data = await api.post('/users', user)
     return data.data
 
   },
 
-  async getusers(){
-    const data=await api.get('/users')
+  async getusers() {
+    const data = await api.get('/users')
     return data.data
   }
   ,
   async getUserByName(username) {
-  const res = await api.get(`/users?username=${username}`);
-  return res.data;
-}
+    const res = await api.get(`/users?username=${username}`);
+    return res.data;
+  }
 
 
 

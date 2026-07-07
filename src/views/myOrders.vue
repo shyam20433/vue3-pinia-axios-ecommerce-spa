@@ -1,11 +1,18 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { ref, onMounted } from 'vue'
+import router from '@/router'
 import apicall from '@/services/server'
 const auth = useAuthStore()
+import backBtn from '@/components/backBtn.vue'
+
+
 
 const myorders = ref([])
 
+function back(){
+  return router.push('/productapi')
+}
 async function getmyorders() {
   const orders = await apicall.getOrders()
   myorders.value = orders.filter((order) => order.user.id === auth.currentUser.id)
@@ -16,6 +23,7 @@ onMounted(() => {
 })
 </script>
 <template>
+  <backBtn @back="back"/>
   <v-container class="py-8">
     <h1 class="text-h4 font-weight-bold text-center mb-8">My Orders</h1>
 
@@ -31,7 +39,7 @@ onMounted(() => {
     </v-alert>
 
     <v-card v-for="order in myorders" :key="order.id" class="mb-8" elevation="3" rounded="lg">
-    
+
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="font-weight-bold"> Order #{{ order.id }} </span>
 

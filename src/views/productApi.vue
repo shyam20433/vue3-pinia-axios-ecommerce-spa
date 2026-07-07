@@ -1,12 +1,13 @@
 <script setup>
 import apicall from '@/services/server'
 //import router from '@/router';
-import { ref } from 'vue'
+import { ref, computed,watch } from 'vue'
 import { onMounted } from 'vue'
 import { carts } from '@/stores/carts'
 import { useAuthStore } from '@/stores/auth'
 import apiAdminControlBtn from '@/components/apiAdminControlBtn.vue'
 import { useToast } from 'vue-toastification'
+
 
 const toast = useToast()
 
@@ -23,6 +24,21 @@ const id = ref('')
 const name = ref('')
 const price = ref('')
 const image = ref('')
+const sortby = ref('default')
+const search = ref('')
+let timer
+
+
+watch(search,(newvalue)=>{
+  clearTimeout(timer)
+  timer=setTimeout(async()=>{
+    if(newvalue.trim()===""){
+      get()
+    }else{
+      products.value=await apicall.searchProducts(newvalue)
+    }
+  },1000)
+})
 
 async function addproduct() {
   const product = {
@@ -35,8 +51,8 @@ async function addproduct() {
   get()
 }
 
-function clearForm(){
-  id.value=""
+function clearForm() {
+  id.value = ''
   get()
 }
 
@@ -67,6 +83,22 @@ async function get() {
   products.value = await apicall.getproducts()
 }
 
+const sortedproducts = computed(() => {
+  const product = [...products.value]
+  if (sortby.value == 'low') {
+    product.sort((a, b) => a.price - b.price)
+  } else if (sortby.value == 'high') {
+    product.sort((a, b) => b.price - a.price)
+  }
+  return product
+})
+
+/* const filteredProducts = computed(() => {
+  return products.value.filter((prod) => {
+    return prod.name.toLowerCase().includes(search.value.toLowerCase())
+  })
+})
+ */
 async function fetchid() {
   product.value = await apicall.getproduct(id.value)
 }
@@ -83,8 +115,13 @@ function addtocart(prod) {
     cart.addtocart(prod)
   }
 }
+
+const sortOptions = [{ title: 'default', value: 'default' },{ title: 'low to high', value: 'low' },{ title: 'high to low', value: 'high' }]
+
+
 </script>
 <template>
+
   <v-container>
     <h1 class="text-h4 text-center mb-6">Product Management</h1>
 
@@ -100,6 +137,24 @@ function addtocart(prod) {
             variant="outlined"
             hide-details
           />
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-text-field
+            v-model="search"
+            label="search"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            clearable
+          />
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-select
+            v-model="sortby"
+            label="sort by price"
+            :items="sortOptions"
+            variant="outlined"
+            hide-details
+          ></v-select>
         </v-col>
 
         <!-- PRODUCT NAME -->
@@ -179,7 +234,7 @@ function addtocart(prod) {
     <!-- //product list -->
 
     <v-row>
-      <v-col v-for="prod in products" :key="prod.id" cols="12" sm="6" md="4" lg="3">
+      <v-col v-for="prod in sortedproducts" :key="prod.id" cols="12" sm="6" md="4" lg="3">
         <v-card elevation="4" height="100%" class="d-flex flex-column">
           <!-- IMAGE -->
 
