@@ -1,4 +1,6 @@
 import axios from "axios";
+
+let productsCache = null
 const api = axios.create({
   baseURL: 'http://localhost:8080'
 }
@@ -36,8 +38,14 @@ const apicall = {
     return response.data.filter((prod)=>prod.name.toLowerCase().includes(search.toLowerCase()))
   },
   async getproducts() {
+    if (productsCache){
+      console.log(`cache memory's data`)
+      return productsCache
+    }else{
     const data = await api.get('/products')
-    return data.data
+    console.log(`api's data and data is now stored in cache memory !!`)
+      productsCache=data.data
+    return data.data}
   },
   async getproduct(id) {
     const data = await api.get(`/products/${id}`)
@@ -49,10 +57,12 @@ const apicall = {
   },
   async addproduct(product) {
     const data = await api.post('/products', product)
+    productsCache=null
     return data.data
   },
   async updateproduct(id, product) {
     const data = await api.put(`/products/${id}`, product)
+    productsCache=null
     return data.data
   },
 
@@ -77,6 +87,7 @@ const apicall = {
 
   async deleteCart(id) {
     const res = await api.delete(`/carts/${id}`);
+    productsCache=null
     return res.data;
   },
 

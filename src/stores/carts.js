@@ -85,13 +85,21 @@ export const carts = defineStore('cart', {
       )
     },
 
-    delcart(index) {
+    delcart(id) {
+      const index = this.cartItems.findIndex(
+        item => item.id === id
+      )
 
-      this.cartItems.splice(index, 1)
+      if (index !== -1) {
+        this.cartItems.splice(index, 1)
+      }
+
       const key = this.getcartkey()
-      localStorage.setItem(key, JSON.stringify(this.cartItems))
-      toast.error(`product removed from the cart`)
-      //this.savecart()
+
+      localStorage.setItem(
+        key,
+        JSON.stringify(this.cartItems)
+      )
     },
     clearcart() {
       const key = this.getcartkey()

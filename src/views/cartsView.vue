@@ -12,6 +12,15 @@ const sortby = ref('default')
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
+let timer=null
+
+function debounceSearch(event){
+  const keyword=event.target.value
+  clearTimeout(timer)
+  timer=setTimeout(() => {
+    search.value=keyword
+  }, 1000);
+}
 
 function del(index) {
   cart.delcart(index)
@@ -70,7 +79,7 @@ async function placeOrder() {
     <backBtn @back="back" />
     <div class="search-container">
       <h2>
-        <input type="text" v-model="search" placeholder="Search products" class="search-box" />
+        <input type="text" @input="debounceSearch" placeholder="Search products" class="search-box" />
       </h2>
     </div>
     <div class="sort-container">
@@ -83,7 +92,7 @@ async function placeOrder() {
 
     <!-- Added (prod, index) to access the array index for deletion -->
     <div class="products">
-      <div v-for="(prod, index) in sortedproducts" :key="prod.id" class="card">
+      <div v-for="(prod) in sortedproducts" :key="prod.id" class="card">
         <div class="image">
           <img :src="prod.image" :alt="prod.name" class="product-image" />
         </div>
@@ -118,7 +127,7 @@ async function placeOrder() {
           </tr>
           <tr>
             <td colspan="2" class="action-cell">
-              <removeCrtBtn @delete="del(index)" />
+              <removeCrtBtn @delete="del(prod.id)" />
             </td>
           </tr>
         </table>
