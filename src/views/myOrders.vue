@@ -21,6 +21,8 @@ async function getmyorders() {
 onMounted(() => {
   getmyorders()
 })
+
+
 </script>
 <template>
   <backBtn @back="back"/>

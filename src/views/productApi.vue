@@ -149,6 +149,9 @@ const sortOptions = [
   { title: 'low to high', value: 'low' },
   { title: 'high to low', value: 'high' },
 ]
+
+
+
 </script>
 <template>
   <v-container>

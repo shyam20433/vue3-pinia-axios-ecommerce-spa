@@ -2,18 +2,30 @@ import axios from "axios";
 
 let productsCache = null
 const api = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: 'http://127.0.0.1:3333'
 }
 )
-api.interceptors.request.use((config) => {
-  console.log("------request interceptor------")
-  console.log("method : ", config.method)
-  console.log("Url : ", config.url)
+api.interceptors.request.use(
+  (config) => {
+    const currentUser = JSON.parse(
+      localStorage.getItem('currentUser')
+    )
 
-  return config
-}, (error) => {
-  return Promise.reject(error)
-}
+    if (currentUser) {
+      config.headers['user-id'] = currentUser.id
+    }
+
+    console.log('------request interceptor------')
+    console.log('method : ', config.method)
+    console.log('Url : ', config.url)
+    console.log('user-id:', config.headers['user-id'])
+
+    return config
+  },
+
+  (error) => {
+    return Promise.reject(error)
+  },
 )
 
 
@@ -51,10 +63,7 @@ const apicall = {
     const data = await api.get(`/products/${id}`)
     return data.data
   },
-  async delproduct(id) {
-    const data = await api.delete(`/products/${id}`)
-    return data.data
-  },
+   
   async addproduct(product) {
     const data = await api.post('/products', product)
     productsCache=null
@@ -101,10 +110,13 @@ const apicall = {
     const res = await api.get("/orders");
     return res.data;
   },
-  async delOrder(id) {
-    const res = await api.delete(`/orders/${id}`)
-    return res.data
-  },
+ async deleteOrder(id) {
+  console.log('API deleting:', id)
+
+  const response = await api.delete(`/orders/${id}`)
+
+  return response.data
+},
 
 
   //useraccount

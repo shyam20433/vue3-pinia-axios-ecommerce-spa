@@ -15,15 +15,28 @@ onMounted(() => {
   getOrders()
 })
 
-async function removeOrder(id) {
-  toast.success(`order deleted `)
-  await apicall.delOrder(id)
-  getOrders()
-}
-async function shipped(id) {
-  toast.success(`order shipped`)
-  await apicall.delOrder(id)
-  getOrders()
+
+
+async function deleteOrder(id) {
+  try {
+    console.log('Deleting order ID:', id)
+
+    const result = await apicall.deleteOrder(id)
+
+    console.log('Delete response:', result)
+
+    orders.value = orders.value.filter(
+      (order) => order.id !== id
+    )
+
+    toast.success('Order deleted successfully')
+  } catch (error) {
+    console.log('DELETE ERROR:', error)
+    console.log('STATUS:', error.response?.status)
+    console.log('DATA:', error.response?.data)
+
+    toast.error('Failed to delete order')
+  }
 }
 </script>
 
@@ -32,7 +45,7 @@ async function shipped(id) {
     <div class="order-card" v-for="order in orders" :key="order.id">
       <h2>Order :{{ order.id }}</h2>
       <h2>username :{{ order.user.username }}</h2>
-      <adminOrdersBtn @remove="removeOrder(order.id)" @shipped="shipped(order.id)" />
+      <adminOrdersBtn @remove="deleteOrder(order.id)" @shipped="shipped(order.id)" />
 
       <div class="product-card" v-for="suborder in order.items" :key="suborder.id">
         <img :src="suborder.image" :alt="suborder.name" class="product-image" />

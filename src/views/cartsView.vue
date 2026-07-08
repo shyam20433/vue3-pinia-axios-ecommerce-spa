@@ -16,10 +16,12 @@ let timer=null
 
 function debounceSearch(event){
   const keyword=event.target.value
+  console.log(keyword)
   clearTimeout(timer)
   timer=setTimeout(() => {
+    //console.log(keyword,'1')
     search.value=keyword
-  }, 1000);
+  }, 4000);
 }
 
 function del(index) {

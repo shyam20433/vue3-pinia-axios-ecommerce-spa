@@ -48,6 +48,11 @@ function viewcart() {
     router.push('/carts')
   }
 }
+
+
+
+
+
 </script>
 
 <template>
