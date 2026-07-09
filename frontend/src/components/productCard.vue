@@ -15,7 +15,7 @@ defineProps({
       :alt="prod.name"
       height="200"
       cover
-    ></v-img>
+    />
 
     <v-card-title>
       {{ prod.name }}
@@ -33,15 +33,9 @@ defineProps({
       </p>
     </v-card-text>
 
-    <!-- Parent UI renders here -->
-    <slot></slot>
+    <v-card-actions>
+      <slot name="button"></slot>
+    </v-card-actions>
 
   </v-card>
 </template>
-
-<style scoped>
-.product-card {
-  width: 100%;
-  height: 100%;
-}
-</style>

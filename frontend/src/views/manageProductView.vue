@@ -2,7 +2,8 @@
 import { useProductStore } from '@/stores/products'
 import backBtn from '@/components/backBtn.vue'
 import router from '@/router'
-import adminControlBtn from '@/components/adminControlBtn.vue'
+import productCard from '@/components/productCard.vue'
+import apiAdminControlBtn from '@/components/apiAdminControlBtn.vue'
 import { ref } from 'vue'
 
 const product = useProductStore()
@@ -97,36 +98,20 @@ function clear() {
       </div>
     </form>
 
-    <!-- Grid Products Section -->
     <div class="products">
-      <div v-for="(prod, index) in product.products" :key="prod.id" class="card">
-        <div class="image">
-          <img :src="prod.image" :alt="prod.name" class="product-image" />
-        </div>
-
-        <table>
-          <tbody>
-            <tr>
-              <th>Product ID</th>
-              <td>{{ prod.id }}</td>
-            </tr>
-            <tr>
-              <th>Product Name</th>
-              <td>{{ prod.name }}</td>
-            </tr>
-            <tr>
-              <th>Product Price</th>
-              <td class="price">₹{{ prod.price }}</td>
-            </tr>
-            <tr>
-              <td colspan="2" class="action-cell">
-                <adminControlBtn @edit="editProd(index)" @delete="delProd(index)" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <productCard
+    v-for="(prod, index) in product.products"
+    :key="prod.id"
+    :prod="prod"
+  >
+    <template #button>
+      <apiAdminControlBtn
+        @edit="editProd(index)"
+        @delete="delProd(index)"
+      />
+    </template>
+  </productCard>
+</div>
   </div>
 </template>
 

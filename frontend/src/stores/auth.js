@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', {
 
       localStorage.setItem(
         'currentUser',
-        JSON.stringify(this.currentUser),
+        JSON.stringify(user),
       )
 
       localStorage.setItem(

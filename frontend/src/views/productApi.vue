@@ -3,6 +3,7 @@ import apicall from '@/services/server'
 //import router from '@/router';
 import { ref, computed, watch } from 'vue'
 import productCard from '@/components/productCard.vue'
+
 import { onMounted } from 'vue'
 import { carts } from '@/stores/carts'
 import { useAuthStore } from '@/stores/auth'
@@ -29,15 +30,14 @@ const search = ref('')
 let timer
 const loading = ref(false)
 
-import SearchBar from '@/components/searchBarBtn.vue'
 
-async function searchProduct(keyword) {
+/* async function searchProduct(keyword) {
   if (keyword.trim() === '') {
     await get()
   } else {
     products.value = await apicall.searchProducts(keyword)
   }
-}
+} */
 /* function debounceSearch(event){
 
   const keyword=event.target.value
@@ -91,29 +91,29 @@ const version = ref(null)
 async function updateproduct() {
 
   const product = {
-    version:version.value,
+    version: version.value,
     name: name.value,
     price: price.value,
     image: image.value,
   }
-  try{
-  await apicall.updateproduct(id.value, product)
-  toast.success(`updated successfully!`)
-  get()
-  return
-}catch(error){
-  if (error.response.status===409){
-    toast.warning("this product is updating by other admin !!!")
+  try {
+    await apicall.updateproduct(id.value, product)
+    toast.success(`updated successfully!`)
+    get()
+    return
+  } catch (error) {
+    if (error.response.status === 409) {
+      toast.warning("this product is updating by other admin !!!")
+    }
+    await get()
+    return
   }
-  await get()
-  return
-}
 
 
 }
 
 function editProduct(prod) {
-  version.value=prod.version
+  version.value = prod.version
   id.value = prod.id
   name.value = prod.name
   price.value = prod.price
@@ -161,21 +161,22 @@ async function delproduct() {
   toast.success(`deleted !!`)
   get()
 }
-const throttledProducts=new Set()
+const throttledProducts = new Set()
 function addtocart(prod) {
   if (!auth.isLoggedIn) {
     toast.warning(`login to add carts !!`)
     return
   } else {
-    if(throttledProducts.has(prod.id)){
+    if (throttledProducts.has(prod.id)) {
       return
-    }else{
-    cart.addtocart(prod)
-    throttledProducts.add(prod.id)
+    } else {
+      cart.addtocart(prod)
+      throttledProducts.add(prod.id)
 
-    setTimeout(()=>{
-      throttledProducts.delete(prod.id)
-    },700)}
+      setTimeout(() => {
+        throttledProducts.delete(prod.id)
+      }, 700)
+    }
   }
 }
 
@@ -197,34 +198,19 @@ const sortOptions = [
         <!-- PRODUCT ID -->
 
         <v-col cols="12" sm="6" md="3">
-          <v-text-field
-            v-model="id"
-            label="Product ID"
-            type="number"
-            variant="outlined"
-            hide-details
-          />
+          <v-text-field v-model="id" label="Product ID" type="number" variant="outlined" hide-details />
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-text-field
-            v-model="search"
-            label="search"
-            prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            clearable
-          />
-          <v-col cols="12" sm="6" md="3">
-            <SearchBar @search="searchProduct" />
-          </v-col>
+          <v-text-field v-model="search" label="search" prepend-inner-icon="mdi-magnify" variant="outlined" clearable />
+
         </v-col>
+
+        <!-- <v-col cols="12" sm="6" md="3">
+          <SearchBar @search="searchProduct" />
+        </v-col> -->
         <v-col cols="12" sm="6" md="3">
-          <v-select
-            v-model="sortby"
-            label="sort by price"
-            :items="sortOptions"
-            variant="outlined"
-            hide-details
-          ></v-select>
+          <v-select v-model="sortby" label="sort by price" :items="sortOptions" variant="outlined"
+            hide-details></v-select>
         </v-col>
 
         <!-- PRODUCT NAME -->
@@ -236,14 +222,8 @@ const sortOptions = [
         <!-- PRODUCT PRICE -->
 
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
-          <v-text-field
-            v-model="price"
-            label="Product Price"
-            type="number"
-            prefix="₹"
-            variant="outlined"
-            hide-details
-          />
+          <v-text-field v-model="price" label="Product Price" type="number" prefix="₹" variant="outlined"
+            hide-details />
         </v-col>
 
         <!-- IMAGE URL -->
@@ -272,12 +252,7 @@ const sortOptions = [
 
     <!--  //selected product -->
 
-    <v-card
-      v-if="auth.isLoggedIn && product.length !== 0"
-      class="pa-5 mb-8 mx-auto"
-      max-width="500"
-      elevation="4"
-    >
+    <v-card v-if="auth.isLoggedIn && product.length !== 0" class="pa-5 mb-8 mx-auto" max-width="500" elevation="4">
       <v-card-title class="text-center"> Selected Product </v-card-title>
 
       <v-img :src="product.image" :alt="product.name" height="250" cover class="rounded-lg" />
@@ -306,9 +281,7 @@ const sortOptions = [
     <div v-if="loading" class="d-flex justify-center my-10">
       <v-progress-circular indeterminate size="60" width="6" /><!-- :model-value="progress" -->
     </div>
-
-
- <v-row v-else>
+<v-row v-else>
   <v-col
     v-for="prod in sortedproducts"
     :key="prod.id"
@@ -319,25 +292,22 @@ const sortOptions = [
   >
     <productCard :prod="prod">
 
-      <v-card-actions
-        v-if="auth.isLoggedIn && !auth.isAdmin"
-      >
-        <v-btn
+      <template #button>
+        <v-btn class="my-btn"
+          v-if="auth.isLoggedIn && !auth.isAdmin"
           color="primary"
-          variant="flat"
           block
           @click="addtocart(prod)"
         >
           Add To Cart
         </v-btn>
-      </v-card-actions>
 
-      <v-card-actions v-if="auth.isAdmin">
         <apiAdminControlBtn
+          v-if="auth.isAdmin"
           @edit="editProduct(prod)"
           @delete="deleteProduct(prod.id)"
         />
-      </v-card-actions>
+      </template>
 
     </productCard>
   </v-col>
@@ -684,3 +654,9 @@ td {
 }
 </style>
  -->
+
+ <style scoped>
+.my-btn{
+  background: red !important;
+}
+</style>
