@@ -17,50 +17,70 @@ export default class UsersController {
 
     return await User.all()
   }
+  public async update({ params, request, response }: HttpContextContract) {
+    const user = await User.find(params.id)
 
+    if (!user) {
+      return response.notFound({
+        message: 'User not found',
+      })
+    }
+
+    user.merge(
+      request.only([
+        'username',
+        'phone',
+        'address',
+      ])
+    )
+
+    await user.save()
+
+    return user
+  }
   public async adminLogin({
-  request,
-  response,
-  auth,
-}: HttpContextContract) {
+    request,
+    response,
+    auth,
+  }: HttpContextContract) {
 
-  const { username, password } = request.only([
-    'username',
-    'password',
-  ])
+    const { username, password } = request.only([
+      'username',
+      'password',
+    ])
 
-  const user = await User.findBy('username', username)
+    const user = await User.findBy('username', username)
 
-  if (!user) {
-    return response.unauthorized({
-      message: 'Invalid username or password',
-    })
+    if (!user) {
+      return response.unauthorized({
+        message: 'Invalid username or password',
+      })
+    }
+
+    const passwordValid = await Hash.verify(
+      user.password,
+      password
+    )
+
+    if (!passwordValid) {
+      return response.unauthorized({
+        message: 'Invalid username or password',
+      })
+    }
+
+    if (user.role !== 'admin') {
+      return response.forbidden({
+        message: 'Admin access required',
+      })
+    }
+
+    const token = await auth.use('api').generate(user)
+
+    return {
+      user,
+      token,
+    }
   }
-
-  const passwordValid = await Hash.verify(
-    user.password,
-    password
-  )
-
-  if (!passwordValid) {
-    return response.unauthorized({
-      message: 'Invalid username or password',
-    })
-  }
-
-  if (user.role !== 'admin') {
-    return response.forbidden({
-      message: 'Admin access required',
-    })
-  }
-
-  const token = await auth.use('api').generate(user)
-
-  return {
-    user,
-    token,
-  }
-}
 
 
   public async show({ params, response }: HttpContextContract) {
@@ -78,7 +98,7 @@ export default class UsersController {
 
   public async store({ request, response }: HttpContextContract) {
     const user = await User.create(
-      request.only(['username', 'role','password'])
+      request.only(['username', 'role', 'password'])
     )
 
     return response.created(user)

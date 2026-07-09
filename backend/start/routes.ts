@@ -18,6 +18,7 @@ Route.delete('/products/:id', 'ProductsController.destroy').middleware(['admin',
 Route.get('/users', 'UsersController.index')
 Route.get('/users/:id', 'UsersController.show')
 Route.post('/users', 'UsersController.store')
+Route.put('/users/:id', 'UsersController.update')
 
 // Orders
 Route.get('/orders', 'OrdersController.index')

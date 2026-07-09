@@ -1,255 +1,679 @@
 <script setup>
-import { useProductStore } from '@/stores/products'
-import backBtn from '@/components/backBtn.vue'
-import router from '@/router'
+import apicall from '@/services/server'
+//import router from '@/router';
+import { ref, computed, watch } from 'vue'
 import productCard from '@/components/productCard.vue'
+
+import { onMounted } from 'vue'
+import { carts } from '@/stores/carts'
+import { useAuthStore } from '@/stores/auth'
 import apiAdminControlBtn from '@/components/apiAdminControlBtn.vue'
-import { ref } from 'vue'
+import { useToast } from 'vue-toastification'
 
-const product = useProductStore()
+const toast = useToast()
 
+onMounted(() => {
+  get()
+})
+
+const cart = carts()
+const auth = useAuthStore()
+
+const products = ref([])
+const product = ref([])
 const id = ref('')
 const name = ref('')
 const price = ref('')
 const image = ref('')
-const editIndex = ref(-1)
+const sortby = ref('default')
+const search = ref('')
+const description = ref('')
+const category = ref('')
+const brand = ref('')
+let timer
+const loading = ref(false)
 
-function back() {
-  router.push('/products')
+
+/* async function searchProduct(keyword) {
+  if (keyword.trim() === '') {
+    await get()
+  } else {
+    products.value = await apicall.searchProducts(keyword)
+  }
+} */
+/* function debounceSearch(event){
+
+  const keyword=event.target.value
+  console.log(keyword)
+  clearTimeout(timer)
+  timer=setTimeout(async() => {
+
+    products.value=await apicall.searchProducts(keyword)
+  }, 1000);
+}
+ */
+watch(search, (newvalue) => {
+  console.log(newvalue)
+  clearTimeout(timer)
+  timer = setTimeout(async () => {
+    if (newvalue.trim() === '') {
+      get()
+    } else {
+      products.value = await apicall.searchProducts(newvalue)
+    }
+  }, 1000)
+})
+
+async function addproduct() {
+  const product = {
+    name: name.value,
+    price: price.value,
+    image: image.value,
+    description: description.value,
+  category: category.value,
+  brand: brand.value,
+  }
+
+  try {
+    await apicall.addproduct(product)
+
+    toast.success('Added successfully !!')
+    get()
+  } catch (error) {
+    console.log('STATUS:', error.response?.status)
+    console.log('BACKEND ERROR:', error.response?.data)
+
+    toast.error(
+      error.response?.data?.message || 'Failed to add product'
+    )
+  }
 }
 
-function resetForm() {
+function clearForm() {
   id.value = ''
   name.value = ''
   price.value = ''
   image.value = ''
-  editIndex.value = -1
-}
+  description.value = ''
+  category.value = ''
+  brand.value = ''
+  version.value = null
 
-function addProd() {
-  const prod = {
-    id: Number(id.value),
-    name: name.value,
-    price: Number(price.value),
-    image: image.value,
+  get()
+}
+const version = ref(null)
+async function updateproduct() {
+
+  const product = {
+  version: version.value,
+  name: name.value,
+  price: price.value,
+  image: image.value,
+  description: description.value,
+  category: category.value,
+  brand: brand.value,
+}
+  try {
+    await apicall.updateproduct(id.value, product)
+    toast.success(`updated successfully!`)
+    get()
+    return
+  } catch (error) {
+    if (error.response.status === 409) {
+      toast.warning("this product is updating by other admin !!!")
+    }
+    await get()
+    return
   }
 
-  if (editIndex.value === -1) {
-    product.addProduct(prod)
+
+}
+
+function editProduct(prod) {
+  version.value = prod.version
+  id.value = prod.id
+  name.value = prod.name
+  price.value = prod.price
+  image.value = prod.image
+  description.value = prod.description
+category.value = prod.category
+brand.value = prod.brand
+}
+async function deleteProduct(id) {
+  await apicall.delproduct(id)
+  toast.success('Deleted Successfully')
+  get()
+}
+
+async function get() {
+  loading.value = true
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    products.value = await apicall.getproducts()
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const sortedproducts = computed(() => {
+  const product = [...products.value]
+  if (sortby.value == 'low') {
+    product.sort((a, b) => a.price - b.price)
+  } else if (sortby.value == 'high') {
+    product.sort((a, b) => b.price - a.price)
+  }
+  return product
+})
+
+/* const filteredProducts = computed(() => {
+  return products.value.filter((prod) => {
+    return prod.name.toLowerCase().includes(search.value.toLowerCase())
+  })
+})
+ */
+async function fetchid() {
+  product.value = await apicall.getproduct(id.value)
+}
+async function delproduct() {
+  await apicall.delproduct(id.value)
+  toast.success(`deleted !!`)
+  get()
+}
+const throttledProducts = new Set()
+function addtocart(prod) {
+  if (!auth.isLoggedIn) {
+    toast.warning(`login to add carts !!`)
+    return
   } else {
-    product.products.splice(editIndex.value, 1, prod)
-  }
-  resetForm()
-}
+    if (throttledProducts.has(prod.id)) {
+      return
+    } else {
+      cart.addtocart(prod)
+      throttledProducts.add(prod.id)
 
-function editProd(index) {
-  editIndex.value = index
-  id.value = product.products[editIndex.value].id
-  name.value = product.products[editIndex.value].name
-  image.value = product.products[editIndex.value].image
-  price.value = product.products[editIndex.value].price
-}
-
-function delProd(index) {
-  product.delProduct(index)
-  if (editIndex.value === index) {
-    resetForm()
+      setTimeout(() => {
+        throttledProducts.delete(prod.id)
+      }, 700)
+    }
   }
 }
 
-function clear() {
-  product.products = []
-  resetForm()
-}
+const sortOptions = [
+  { title: 'default', value: 'default' },
+  { title: 'low to high', value: 'low' },
+  { title: 'high to low', value: 'high' },
+]
+
+
+
 </script>
-
 <template>
-  <div class="admin-container">
-    <backBtn @back="back" />
+  <v-container>
+    <h1 class="text-h4 text-center mb-6">Product Management</h1>
 
-    <!-- Form Section -->
-    <form @submit.prevent="addProd" class="admin-form">
-      <h3>{{ editIndex === -1 ? 'Add New Product' : 'Edit Product' }}</h3>
-      <div class="form-group">
-        <label for="prod-id">Product ID</label>
-        <input id="prod-id" type="number" v-model="id" required />
+    <v-card class="pa-6 mb-8" elevation="3">
+      <v-row>
+        <!-- PRODUCT ID -->
+
+        <v-col cols="12" sm="6" md="3">
+          <v-text-field v-model="id" label="Product ID" type="number" variant="outlined" hide-details required />
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-text-field v-model="search" label="search" prepend-inner-icon="mdi-magnify" variant="outlined" clearable />
+
+        </v-col>
+
+        <!-- <v-col cols="12" sm="6" md="3">
+          <SearchBar @search="searchProduct" />
+        </v-col> -->
+        <v-col cols="12" sm="6" md="3">
+          <v-select v-model="sortby" label="sort by price" :items="sortOptions" variant="outlined"
+            hide-details></v-select>
+        </v-col>
+
+        <!-- PRODUCT NAME -->
+
+        <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+          <v-text-field v-model="name" label="Product Name" variant="outlined" hide-details />
+        </v-col>
+
+        <!-- PRODUCT PRICE -->
+
+        <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+          <v-text-field v-model="price" label="Product Price" type="number" prefix="₹" variant="outlined"
+            hide-details />
+        </v-col>
+
+        <!-- IMAGE URL -->
+
+        <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+          <v-text-field v-model="image" label="Image URL" variant="outlined" hide-details />
+        </v-col>
+        <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+  <v-text-field
+    v-model="description"
+    label="Description"
+    variant="outlined"
+    hide-details
+  />
+</v-col>
+
+<v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+  <v-text-field
+    v-model="category"
+    label="Category"
+    variant="outlined"
+    hide-details
+  />
+</v-col>
+
+<v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
+  <v-text-field
+    v-model="brand"
+    label="Brand"
+    variant="outlined"
+    hide-details
+  />
+</v-col>
+      </v-row>
+
+
+      <div class="d-flex justify-center flex-wrap ga-3 mt-6">
+        <v-btn v-if="auth.isAdmin" color="success" variant="flat" @click="addproduct"> Add </v-btn>
+
+        <!-- <v-btn v-if="auth.isAdmin" color="success" variant="flat" @click="get"> get </v-btn> -->
+
+        <v-btn color="primary" variant="flat" @click="fetchid"> Get </v-btn>
+
+        <v-btn v-if="auth.isAdmin" color="error" variant="flat" @click="delproduct"> Delete </v-btn>
+
+        <v-btn v-if="auth.isAdmin" color="warning" variant="flat" @click="updateproduct">
+          Update
+        </v-btn>
+
+        <v-btn color="secondary" variant="outlined" @click="clearForm"> Clear </v-btn>
       </div>
+    </v-card>
 
-      <div class="form-group">
-        <label for="prod-name">Product Name</label>
-        <input id="prod-name" type="text" required v-model="name" />
-      </div>
+    <!--  //selected product -->
 
-      <div class="form-group">
-        <label for="prod-price">Price (₹)</label>
-        <input id="prod-price" type="number" required v-model="price" />
-      </div>
+    <v-card v-if="auth.isLoggedIn && product.length !== 0" class="pa-5 mb-8 mx-auto" max-width="500" elevation="4">
+      <v-card-title class="text-center"> Selected Product </v-card-title>
 
-      <div class="form-group">
-        <label for="prod-img">Image URL</label>
-        <input id="prod-img" type="text" v-model="image" placeholder="https://example.com" />
-      </div>
+      <v-img :src="product.image" :alt="product.name" height="250" cover class="rounded-lg" />
 
-      <div class="form-actions">
-        <button type="submit" class="btn-submit">
-          {{ editIndex === -1 ? 'Add Product' : 'Update Product' }}
-        </button>
-        <button type="button" class="btn-clear" @click="clear">Clear All</button>
-      </div>
-    </form>
+      <v-card-text>
+        <p class="mb-2">
+          <strong>ID:</strong>
 
-    <div class="products">
-  <productCard
-    v-for="(prod, index) in product.products"
+          {{ product.id }}
+        </p>
+
+        <p class="mb-2">
+          <strong>Name:</strong>
+
+          {{ product.name }}
+        </p>
+
+        <p>
+          <strong>Price:</strong>
+
+          {{ $formatPrice(product.price) }}
+        </p>
+      </v-card-text>
+    </v-card>
+
+    <div v-if="loading" class="d-flex justify-center my-10">
+      <v-progress-circular indeterminate size="60" width="6" /><!-- :model-value="progress" -->
+    </div>
+<v-row v-else>
+  <v-col
+    v-for="prod in sortedproducts"
     :key="prod.id"
-    :prod="prod"
+    cols="12"
+    sm="6"
+    md="4"
+    lg="3"
   >
-    <template #button>
-      <apiAdminControlBtn
-        @edit="editProd(index)"
-        @delete="delProd(index)"
-      />
-    </template>
-  </productCard>
-</div>
+    <productCard :prod="prod">
+
+      <template #button>
+        <v-btn
+          v-if="auth.isLoggedIn && !auth.isAdmin"
+          color="primary"
+          block
+          @click="addtocart(prod)"
+        >
+          Add To Cart
+        </v-btn>
+
+        <apiAdminControlBtn
+          v-if="auth.isAdmin"
+          @edit="editProduct(prod)"
+          @delete="deleteProduct(prod.id)"
+        />
+      </template>
+
+    </productCard>
+  </v-col>
+</v-row>
+  </v-container>
+</template>
+<!--
+<template>
+<input type="number" v-model="id" placeholder="id ">
+<input type="text" v-model="name" placeholder="name">
+<input type="number" v-model="price" placeholder="price">
+<input type="text" v-model="image" placeholder="image url">
+<button @click="addproduct()">add</button>
+<button @click="get">fetch all</button>
+<button @click="fetchid()">id get</button>
+<button @click="delproduct()">delete id</button>
+<button @click="updateproduct">update</button>
+  <h2>selected items</h2>
+  <img :src="product.image" :alt="product.name" class="product-image" />
+  <table>
+  <tr>
+    <th>id</th>
+    <th><h3>{{product.id}}</h3></th>
+  </tr>
+ <tr>
+  <th>Name</th>
+  <th> <h3>{{product.name}}</h3></th>
+ </tr>
+  <tr>
+    <th>price</th>
+    <th><h3>{{product.price}}</h3></th>
+  </tr>
+  </table>
+
+
+
+
+
+  <div v-for="product in products" :key="product.id" >
+    <img :src="product.image" :alt="product.name" class="product-image" />
+    <table>
+    <tr>
+      <th><label for="">Id</label></th>
+      <th><h3>{{ product.id }}</h3></th>
+</tr>
+    <tr>
+      <th><label for="">name</label></th>
+      <th><h3>{{ product.name }}</h3></th>
+</tr>
+    <tr>
+      <th><label for="">price</label></th>
+      <th><h3>₹{{ product.price }}</h3></th>
+</tr>
+
+  </table>
   </div>
+
 </template>
 
-<style scoped>
-/* Main Layout wrapper matching the theme */
-.admin-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
+
+<template>
+  <div class="container">
+    <h1 class="title">Product Management</h1>
+
+    <div class="form-container">
+      <v-text-field type="number" v-model="id" label="Product ID" variant="outlined" />
+      <input
+        v-if="auth.isAdmin"
+        type="text"
+        v-model="name"
+        placeholder="Product Name"
+        class="input-box"
+      />
+      <v-text-field
+        v-if="auth.isAdmin"
+        type="number"
+        v-model="price"
+        label="Product Price" variant="outlined"
+      />
+      <input
+        v-if="auth.isAdmin"
+        type="text"
+        v-model="image"
+        placeholder="Image URL"
+        class="input-box"
+      />
+
+      <div class="btn-group">
+        <v-btn @click="addproduct()" v-if="auth.isAdmin" placeholder="search by id" color="success" variant="flat">Add</v-btn>
+        <button @click="get">Fetch All</button>
+        <v-btn color="primary" variant="flat" @click="fetchid()">Get</v-btn>
+        <v-btn color="error" variant="flat" @click="delproduct()" v-if="auth.isAdmin">Delete</v-btn>
+        <v-btn color="warning" variant="flat" @click="updateproduct" v-if="auth.isAdmin">Update</v-btn>
+      </div>
+    </div>
+
+    <div class="selected-card" v-if="auth.isLoggedIn  && product.id">
+      <h2>Selected Product</h2>
+
+      <img :src="product.image" :alt="product.name" class="product-image" />
+
+      <table>
+        <tr>
+          <th>ID</th>
+          <td>{{ product.id }}</td>
+        </tr>
+
+        <tr>
+          <th>Name</th>
+          <td>{{ product.name }}</td>
+        </tr>
+
+        <tr>
+          <th>Price</th>
+          <td>₹{{ product.price }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <v-container>
+  <v-row>
+    <v-col
+      v-for="product in products"
+      :key="product.id"
+      cols="12"
+      sm="6"
+      md="4"
+      lg="3"
+    >
+      <v-card elevation="4">
+
+        <v-img
+          :src="product.image"
+          :alt="product.name"
+          height="200"
+          cover
+        />
+
+        <v-card-title>
+          {{ product.name }}
+        </v-card-title>
+
+        <v-card-text>
+          <p><strong>ID:</strong> {{ product.id }}</p>
+
+          <p>
+            <strong>Price:</strong>
+            ₹{{ product.price }}
+          </p>
+        </v-card-text>
+
+        <v-card-actions>
+
+          <v-btn
+            v-if="auth.isLoggedIn && !auth.isAdmin"
+            color="primary"
+            variant="flat"
+            block
+            @click="addtocart(product)"
+          >
+            Add To Cart
+          </v-btn>
+
+        </v-card-actions>
+
+        <apiAdminControlBtn
+          v-if="auth.isAdmin"
+          @edit="editProduct(product)"
+          @delete="deleteProduct(product.id)"
+        />
+
+      </v-card>
+    </v-col>
+  </v-row>
+</v-container>
+  </div>
+</template> -->
+<!--
+<style>
+.container {
+  max-width: 1300px;
+  margin: auto;
+  padding: 30px;
+  background: #f5f7fb;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Polished Management Form Card */
-.admin-form {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  max-width: 500px;
-  margin: 24px auto 40px auto;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+.title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #1f2937;
 }
-
-.admin-form h3 {
-  margin: 0 0 16px 0;
-  color: #1e293b;
-  font-size: 18px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a5568;
-}
-
-.form-group input {
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.form-group input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-/* Form Buttons Setup */
-.form-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.btn-submit,
-.btn-clear {
-  flex: 1;
-  padding: 11px;
+.cart-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: 0.3s;
 }
 
-.btn-submit {
-  background-color: #3b82f6;
+.cart-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.form-container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.input-box {
+  width: 260px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.input-box:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-group {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.btn-group button {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 8px;
   color: white;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
 }
 
-.btn-clear {
-  background-color: #ef4444;
-  color: white;
+.btn-group button:nth-child(1) {
+  background: #10b981;
 }
 
-.btn-submit:hover,
-.btn-clear:hover {
+.btn-group button:nth-child(2) {
+  background: #2563eb;
+}
+
+.btn-group button:nth-child(3) {
+  background: #8b5cf6;
+}
+
+.btn-group button:nth-child(4) {
+  background: #ef4444;
+}
+
+.btn-group button:nth-child(5) {
+  background: #f59e0b;
+}
+
+.btn-group button:hover {
+  transform: translateY(-3px);
   opacity: 0.9;
 }
 
-/* Grid Layout matching the product cards grid */
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+.selected-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 35px;
+  text-align: center;
 }
 
-/* Card layout wrapper rules */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
 .card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: white;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  display: flex;
-  flex-direction: column;
+  padding: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-/* Restructured clean image styles */
-.image {
-  width: 100%;
-  height: 180px;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #f8fafc;
-  margin-bottom: 16px;
+  transform: translateY(-6px);
 }
 
 .product-image {
-  width: 100%;
-  height: 100%;
+  width: 200px;
+  height: 200px;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
+  display: block;
+  margin: 0 auto 15px;
+  border-radius: 10px;
 }
 
-/* Typography styles matching the main cards */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -257,30 +681,24 @@ table {
 
 th,
 td {
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 10px;
   text-align: left;
 }
 
 th {
-  color: #64748b;
-  font-weight: 500;
-  width: 45%;
+  width: 35%;
+  color: #6b7280;
 }
 
 td {
-  color: #1e293b;
-  font-weight: 600;
+  font-weight: bold;
+  color: #111827;
 }
 
-.price {
-  color: #0f172a;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.action-cell {
-  padding-top: 16px;
-  text-align: center;
+.selected-card table {
+  width: 350px;
+  margin: auto;
 }
 </style>
+ -->
+

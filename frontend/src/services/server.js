@@ -195,6 +195,15 @@ const apicall = {
     return res.data;
   },
 
+  async updateUser(id, user) {
+  const response = await api.put(
+    `/users/${id}`,
+    user
+  )
+
+  return response.data
+},
+
 
 
   //admin calling

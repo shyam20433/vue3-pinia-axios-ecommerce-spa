@@ -28,14 +28,13 @@ function logout() {
 
     <ul class="nav-links">
       <li>
-        <RouterLink to="/productapi">
-          Products
+        <RouterLink to="/users">
+          Users
         </RouterLink>
       </li>
-
       <li>
         <RouterLink to="/manage">
-          Manage Products
+          Products
         </RouterLink>
       </li>
 
@@ -44,6 +43,7 @@ function logout() {
           Orders
         </RouterLink>
       </li>
+
     </ul>
 
     <div class="user-menu">
@@ -60,10 +60,7 @@ function logout() {
 
 
   <!-- USER NAVBAR -->
-  <nav
-    v-else-if="auth.isLoggedIn"
-    class="navbar user-navbar"
-  >
+  <nav v-else-if="auth.isLoggedIn" class="navbar user-navbar">
     <div class="brand">
       <span class="brand-icon">◆</span>
 
@@ -98,6 +95,14 @@ function logout() {
         <small>Welcome back</small>
         <span>{{ auth.currentUser?.username }}</span>
       </div>
+      <ul>
+        <li>
+          <RouterLink to="/profile">
+            Profile
+          </RouterLink>
+        </li>
+      </ul>
+
 
       <button class="logout-btn" @click="logout">
         Logout

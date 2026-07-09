@@ -16,6 +16,15 @@ export default class Product extends BaseModel {
 
   @column.dateTime({ autoCreate: true })
   public createdAt!: DateTime
+
+  @column()
+public description!: string
+
+@column()
+public category!: string
+
+@column()
+public brand!: string
   @column()
 public version!: number
 
