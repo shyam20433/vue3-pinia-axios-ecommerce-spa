@@ -8,6 +8,7 @@ import backBtn from '@/components/backBtn.vue'
 
 
 
+
 const myorders = ref([])
 
 function back(){
@@ -49,7 +50,7 @@ onMounted(() => {
       </v-card-title>
 
       <v-card-subtitle class="pb-4">
-        {{ order.order_date }}
+        {{ $formatDate(order.order_date) }}
       </v-card-subtitle>
 
       <v-divider />
@@ -74,7 +75,7 @@ onMounted(() => {
                 <div class="d-flex justify-space-between mb-2">
                   <span>Price</span>
 
-                  <strong> ₹{{ item.price }} </strong>
+                  <strong> {{ $formatPrice(item.price) }} </strong>
                 </div>
 
                 <div class="d-flex justify-space-between mb-2">
@@ -91,7 +92,7 @@ onMounted(() => {
                   <span class="font-weight-bold"> Total </span>
 
                   <span class="text-primary font-weight-bold">
-                    ₹{{ item.quantity * item.price }}
+                    {{ $formatPrice(item.quantity * item.price) }}
                   </span>
                 </div>
               </v-card-text>
@@ -114,7 +115,7 @@ onMounted(() => {
         <div class="d-flex justify-space-between">
           <span class="text-h6 font-weight-bold"> Order Total </span>
 
-          <span class="text-h6 text-primary font-weight-bold"> ₹{{ order.total_price }} </span>
+          <span class="text-h6 text-primary font-weight-bold"> {{ $formatPrice(order.total_price) }} </span>
         </div>
       </v-card-text>
     </v-card>

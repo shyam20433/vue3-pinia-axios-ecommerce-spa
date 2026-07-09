@@ -273,7 +273,7 @@ const sortOptions = [
         <p>
           <strong>Price:</strong>
 
-          ₹{{ product.price }}
+          {{ $formatPrice(product.price) }}
         </p>
       </v-card-text>
     </v-card>

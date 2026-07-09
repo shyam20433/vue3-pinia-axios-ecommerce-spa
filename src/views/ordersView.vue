@@ -52,19 +52,19 @@ async function deleteOrder(id) {
 
         <h3>{{ suborder.name }}</h3>
 
-        <p><strong>Price :</strong> ₹{{ suborder.price }}</p>
+        <p><strong>Price :</strong> {{ $formatPrice(suborder.price) }}</p>
 
         <p><strong>Quantity :</strong> {{ suborder.quantity }}</p>
 
-        <p><strong>Total :</strong> ₹{{ suborder.price * suborder.quantity }}</p>
+        <p><strong>Total :</strong> {{ $formatPrice(suborder.price * suborder.quantity) }}</p>
       </div>
 
       <div class="summary">
         <p><strong>Total Items :</strong> {{ order.total_items }}</p>
 
-        <p><strong>Total Price :</strong> ₹{{ order.total_price }}</p>
+        <p><strong>Total Price :</strong> {{ $formatPrice(order.total_price) }}</p>
 
-        <p><strong>Order Date :</strong> {{ order.order_date }}</p>
+        <p><strong>Order Date :</strong> {{ $formatDate(order.order_date) }}</p>
       </div>
     </div>
   </div>
