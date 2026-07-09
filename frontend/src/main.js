@@ -11,6 +11,7 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import dateformatter from './plugins/DateFormatter'
 import priceFormatter from './plugins/PriceFormatter'
+import vuetify2 from './plugins/VuetifyCustomBtn'
 
 const vuetify = createVuetify({
   components,
@@ -27,6 +28,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)
+app.use(vuetify2)
 app.use(Toast)
 app.use(dateformatter)
 app.use(priceFormatter)

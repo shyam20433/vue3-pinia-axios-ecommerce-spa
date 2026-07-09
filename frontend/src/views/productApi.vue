@@ -293,7 +293,7 @@ const sortOptions = [
     <productCard :prod="prod">
 
       <template #button>
-        <v-btn class="my-btn"
+        <v-btn 
           v-if="auth.isLoggedIn && !auth.isAdmin"
           color="primary"
           block
@@ -655,8 +655,3 @@ td {
 </style>
  -->
 
- <style scoped>
-.my-btn{
-  background: red !important;
-}
-</style>
