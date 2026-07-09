@@ -3,20 +3,15 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+
 import '@mdi/font/css/materialdesignicons.css'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import dateformatter from './plugins/DateFormatter'
 import priceFormatter from './plugins/PriceFormatter'
-import vuetify2 from './plugins/VuetifyCustomBtn'
+import vuetify from './plugins/VuetifyCustomBtn'
 
-const vuetify = createVuetify({
-  components,
-  directives,
-})
+
 
 
 
@@ -28,7 +23,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)
-app.use(vuetify2)
+
 app.use(Toast)
 app.use(dateformatter)
 app.use(priceFormatter)

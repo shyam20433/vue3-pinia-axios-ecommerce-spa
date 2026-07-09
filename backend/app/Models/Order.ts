@@ -32,6 +32,9 @@ export default class Order extends BaseModel {
   @belongsTo(() => User)
   public user!: BelongsTo<typeof User>
 
+  @column()
+  public status!: string
+
   @column.dateTime({
     autoCreate: true,
   })
@@ -42,4 +45,6 @@ export default class Order extends BaseModel {
     autoUpdate: true,
   })
   public updatedAt!: DateTime
+
+
 }

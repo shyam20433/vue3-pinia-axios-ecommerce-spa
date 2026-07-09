@@ -182,8 +182,8 @@ function cancelDelete() {
                   <v-card-title>remove Product</v-card-title>
                   <v-card-text>are you sure Do you want to remove the product</v-card-text>
                   <v-card-actions class="justify-center">
-                    <v-btn color="red" variant="outlined" @click="cancelDelete">No</v-btn>
-                    <v-btn color="green" variant="outlined" @click="confirmDelete">yes</v-btn>
+                    <v-btn color="primary" variant="flat" @click="cancelDelete">No</v-btn>
+                    <v-btn color="secondary" variant="flat" @click="confirmDelete">yes</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -203,7 +203,7 @@ function cancelDelete() {
           <v-card-title class="text-center"> Order place</v-card-title>
           <v-card-text class="text-center">Do you want to place order</v-card-text>
           <v-card-actions>
-            <v-btn color="green" variant="flat" @click="confirmOrder">Yes</v-btn>
+            <v-btn color="jothisri" variant="flat" @click="confirmOrder">Yes</v-btn>
             <v-btn color="red" variant="flat" @click="cancelOrder">No</v-btn>
           </v-card-actions>
         </v-card>

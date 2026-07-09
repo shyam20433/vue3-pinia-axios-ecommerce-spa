@@ -38,6 +38,15 @@ async function deleteOrder(id) {
     toast.error('Failed to delete order')
   }
 }
+
+async function updateStatus(order) {
+  await apicall.updateOrderStatus(
+    order.id,
+    order.status
+  )
+
+  toast.success('Order status updated')
+}
 </script>
 
 <template>
@@ -46,6 +55,22 @@ async function deleteOrder(id) {
       <h2>Order :{{ order.id }}</h2>
       <h2>username :{{ order.user.username }}</h2>
       <adminOrdersBtn @remove="deleteOrder(order.id)" @shipped="shipped(order.id)" />
+      <v-select
+  v-model="order.status"
+  :items="[
+    'Shipped',
+    'Out for Delivery',
+    'Delivered'
+  ]"
+  label="Order Status"
+/>
+
+<v-btn
+  color="primary"
+  @click="updateStatus(order)"
+>
+  Update Status
+</v-btn>
 
       <div class="product-card" v-for="suborder in order.items" :key="suborder.id">
         <img :src="suborder.image" :alt="suborder.name" class="product-image" />

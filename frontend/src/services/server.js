@@ -10,15 +10,15 @@ api.interceptors.request.use(
     const currentUser = JSON.parse(
       localStorage.getItem('currentUser')
     )
-    const adminToken=localStorage.getItem('adminToken')
-    console.log("local token",adminToken)
+    const adminToken = localStorage.getItem('adminToken')
+    console.log("local token", adminToken)
     if (currentUser) {
       config.headers['user-id'] = currentUser.id
     }
 
-    if(adminToken){
+    if (adminToken) {
 
-      config.headers.Authorization=`${adminToken}`
+      config.headers.Authorization = `${adminToken}`
     }
 
     console.log('------request interceptor------')
@@ -46,14 +46,14 @@ api.interceptors.response.use(
 
   async (error) => {
     const status = error.response?.status
-    const config=error.config
+    const config = error.config
 
-    if (status===500 &&!config.retried){
-      config.retried=true
+    if (status === 500 && !config.retried) {
+      config.retried = true
       console.log(`server error -retrying once !`)
       await new Promise((resolve) => {
-      setTimeout(resolve, 10000)
-    })
+        setTimeout(resolve, 10000)
+      })
       return api(config)
     }
 
@@ -91,17 +91,18 @@ const apicall = {
     const response = await api.get('/products')
 
 
-    return response.data.filter((prod)=>prod.name.toLowerCase().includes(search.toLowerCase()))
+    return response.data.filter((prod) => prod.name.toLowerCase().includes(search.toLowerCase()))
   },
   async getproducts() {
-    if (productsCache){
+    if (productsCache) {
       console.log(`cache memory's data`)
       return productsCache
-    }else{
-    const data = await api.get('/products')
-    console.log(`api's data and data is now stored in cache memory !!`)
-      productsCache=data.data
-    return data.data}
+    } else {
+      const data = await api.get('/products')
+      console.log(`api's data and data is now stored in cache memory !!`)
+      productsCache = data.data
+      return data.data
+    }
   },
   async getproduct(id) {
     const data = await api.get(`/products/${id}`)
@@ -110,18 +111,18 @@ const apicall = {
 
   async addproduct(product) {
     const data = await api.post('/products', product)
-    productsCache=null
+    productsCache = null
     return data.data
   },
   async updateproduct(id, product) {
     const data = await api.put(`/products/${id}`, product)
-    productsCache=null
+    productsCache = null
     return data.data
   },
 
-  async delproduct(id){
-    const data=await api.delete(`/products/${id}`)
-    productsCache=null
+  async delproduct(id) {
+    const data = await api.delete(`/products/${id}`)
+    productsCache = null
     return data.data
   },
 
@@ -146,7 +147,7 @@ const apicall = {
 
   async deleteCart(id) {
     const res = await api.delete(`/carts/${id}`);
-    productsCache=null
+    productsCache = null
     return res.data;
   },
 
@@ -160,14 +161,21 @@ const apicall = {
     const res = await api.get("/orders");
     return res.data;
   },
- async deleteOrder(id) {
-  console.log('API deleting:', id)
+  async deleteOrder(id) {
+    console.log('API deleting:', id)
 
-  const response = await api.delete(`/orders/${id}`)
+    const response = await api.delete(`/orders/${id}`)
 
-  return response.data
-},
+    return response.data
+  },
+  async updateOrderStatus(id, status) {
+    const response = await api.put(
+      `/orders/${id}/status`,
+      { status: status }
+    )
 
+    return response.data
+  },
 
   //useraccount
 
@@ -191,9 +199,9 @@ const apicall = {
 
   //admin calling
   async adminLogin(credentials) {
-  const response = await api.post('/admin/login', credentials)
-  return response.data
-}
+    const response = await api.post('/admin/login', credentials)
+    return response.data
+  }
 }
 
 export default apicall;

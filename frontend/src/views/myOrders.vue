@@ -46,7 +46,7 @@ onMounted(() => {
       <v-card-title class="d-flex justify-space-between align-center">
         <span class="font-weight-bold"> Order #{{ order.id }} </span>
 
-        <v-chip color="success" variant="tonal"> Ordered </v-chip>
+        <v-chip color="success" variant="tonal"> {{order.status}} </v-chip>
       </v-card-title>
 
       <v-card-subtitle class="pb-4">

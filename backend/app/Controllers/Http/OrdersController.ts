@@ -9,6 +9,26 @@ export default class OrdersController {
       .preload('user')
       .orderBy('id', 'desc')
   }
+  public async updateStatus({ params, request, response }: HttpContextContract) {
+  const order = await Order.find(params.id)
+
+  if (!order) {
+    return response.notFound({
+      message: 'Order not found',
+    })
+  }
+
+  const status = request.input('status')
+
+  order.status = status
+
+  await order.save()
+
+  return {
+    message: 'Order status updated successfully',
+    order,
+  }
+}
 
   public async store({ request, response }: HttpContextContract) {
     const order = await Order.create({

@@ -26,3 +26,5 @@ Route.get('/users/:userId/orders', 'OrdersController.myOrders')
 Route.delete('/orders/:id', 'OrdersController.destroy')
   .middleware(['admin','auth'])
 Route.post('/admin/login', 'UsersController.adminLogin')
+
+Route.put('/orders/:id/status', 'OrdersController.updateStatus')
