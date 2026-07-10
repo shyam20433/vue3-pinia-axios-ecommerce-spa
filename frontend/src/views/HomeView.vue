@@ -9,6 +9,22 @@ const toast = useToast()
 const auth = useAuthStore()
 const name = ref('')
 const password = ref('')
+const formRef = ref(null)
+
+const rules = {
+  required: (value) => !!value || 'This field is required',
+  username: (value) => {
+    if (!value) return 'Username is required'
+    if (value.length < 3) return 'Username must be at least 3 characters'
+    return true
+  },
+  password: (value) => {
+    if (!value) return 'Password is required'
+    if (value.length < 6) return 'Password must be at least 6 characters'
+    return true
+  }
+}
+
 
 /*
 function addadmin(adminValue) {
@@ -26,52 +42,76 @@ function adduser(userValue) {
 } */
 
 async function adduser() {
-  if (!name.value.trim()) {
-    toast.info('Enter username')
+  if(!formRef.value){
+    toast.error(`Form not found !`)
     return
   }
+  const { valid } = await formRef.value.validate()
+  if (!valid) { return }
 
-  const existingUser = await apicall.getUserByName(
-    name.value.trim()
-  )
+  try {
 
-  if (existingUser) {
-    auth.login(existingUser)
+    const existingUser = await apicall.getUserByName(
+      name.value.trim()
+    )
 
-    toast.success('Logged in successfully')
-  } else {
-    const newUser = {
-      username: name.value.trim(),
-      role: 'user',
+    if (existingUser) {
+      auth.login(existingUser)
+
+      toast.success('Logged in successfully')
+      name.value = ''
+      password.value = ''
+      formRef.value.resetValidation()
+    } else {
+      const newUser = {
+        username: name.value.trim(),
+        role: 'user',
+      }
+      const createdUser = await apicall.adduser(newUser)
+      auth.login(createdUser)
+      toast.success('Signup Successfully')
+      name.value = ''
+      password.value = ''
+      formRef.value.resetValidation()
     }
-    const createdUser = await apicall.adduser(newUser)
-    auth.login(createdUser)
-    toast.success('Signup Successfully')
+  }
+  catch (error) {
+    toast.error(`Something went Wrong`)
+    console.log(error)
   }
 }
 async function addadmin() {
+   if (!formRef.value) {
+    toast.error('Form not found')
+    return
+  }
+  const { valid } = await formRef.value.validate()
+  if (!valid) { return }
   if (!name.value.trim()) {
     toast('Enter username')
     return
   }
 
-  try{
-    const data=await apicall.adminLogin({
-      username:name.value.trim(),
-      password:password.value
+  try {
+    const data = await apicall.adminLogin({
+      username: name.value.trim(),
+      password: password.value
     })
     console.log('ORIGINAL TOKEN:', data.token.token)
 
-  localStorage.setItem('adminToken',data.token.token)
-  localStorage.setItem('currentUser',JSON.stringify(data.user))
-  auth.login(data.user)
-  toast.success(`Admin logged in successfully`)
-}catch(error){
-  console.log('FULL ERROR:', error)
-  console.log('STATUS:', error.response?.status)
-  console.log('BACKEND RESPONSE:', error.response?.data)
-  toast.error((error.response?.data?.message ||"Admin login Failed"))
-}
+    localStorage.setItem('adminToken', data.token.token)
+    localStorage.setItem('currentUser', JSON.stringify(data.user))
+    auth.login(data.user)
+    toast.success(`Admin logged in successfully`)
+    name.value = ''
+    password.value = ''
+    formRef.value.resetValidation()
+  } catch (error) {
+    console.log('FULL ERROR:', error)
+    console.log('STATUS:', error.response?.status)
+    console.log('BACKEND RESPONSE:', error.response?.data)
+    toast.error((error.response?.data?.message || "Admin login Failed"))
+  }
 
 
 
@@ -81,109 +121,36 @@ async function addadmin() {
 </script>
 
 <template>
-  <div class="login-card">
-    <label for="username" >enter your name</label>
+  <v-container class="d-flex justify-center align-center" style="min-height: 100vh">
+    <v-card class="pa-6" max-width="400" width="100%" elevation="3">
+      <v-card-title class="text-center text-h5 font-weight-bold mb-4">
+        Login
+      </v-card-title>
 
-    <input id="username" type="text" v-model="name" placeholder="John Doe" required />
-<label for="password">Enter password</label>
+      <v-form ref="formRef">
 
-<input
-  id="password"
-  type="password"
-  v-model="password"
-  placeholder="Enter admin password"
-/>
-    <label>select your role</label>
-    <div class="button-group">
-      <button class="btn-user" @click="adduser">user</button>
-      <button class="btn-admin" @click="addadmin">admin</button>
-    </div>
-  </div>
+      <v-text-field v-model="name" label="Username" placeholder="Enter your name" variant="outlined"
+        :rules="[rules.username]" validate-on="blur" prepend-inner-icon="mdi-account" class="mb-2" />
+
+
+      <v-text-field v-model="password" label="Password" placeholder="Enter admin password" variant="outlined"
+        :rules="[rules.password]" validate-on="blur" type="password" prepend-inner-icon="mdi-lock" class="mb-4" />
+
+
+      <v-label class="text-subtitle-2 font-weight-medium mb-2 d-block">
+        Select  role
+      </v-label>
+
+      <div class="d-flex ga-3">
+        <v-btn color="success" variant="flat"  @click="adduser" size="large">
+          User
+        </v-btn>
+
+        <v-btn color="error" variant="flat"  @click="addadmin" size="large">
+          Admin
+        </v-btn>
+      </div>
+      </v-form>
+    </v-card>
+  </v-container>
 </template>
-
-<style scoped>
-/* Card Container */
-.login-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 340px;
-  margin: 60px auto;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
-  padding: 28px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  background-color: #ffffff;
-}
-
-/* Labels */
-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #4a5568;
-  margin-top: 6px;
-  text-transform: capitalize;
-}
-
-/* Input Field */
-input {
-  padding: 10px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 15px;
-  outline: none;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-/* Button Layout Wrapper */
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-/* Base Button Styles */
-button {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: capitalize;
-  transition:
-    opacity 0.2s,
-    transform 0.1s;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-/* Role Styles */
-.btn-user {
-  background-color: #10b981;
-  color: white;
-}
-
-.btn-admin {
-  background-color: #ef4444;
-  color: white;
-}
-</style>

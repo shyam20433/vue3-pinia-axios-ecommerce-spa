@@ -12,6 +12,8 @@ import { useToast } from 'vue-toastification'
 
 const toast = useToast()
 
+
+
 onMounted(() => {
   get()
 })
@@ -32,6 +34,7 @@ const category = ref('')
 const brand = ref('')
 let timer
 const loading = ref(false)
+const formRef = ref(null)
 
 
 /* async function searchProduct(keyword) {
@@ -65,6 +68,12 @@ watch(search, (newvalue) => {
 })
 
 async function addproduct() {
+  if(!formRef.value){return}
+  const {valid}=await formRef.value.validate()
+  if(!valid){
+    toast.error(`please enter require fields correctly !`)
+    return
+  }
   const product = {
     name: name.value,
     price: price.value,
@@ -98,12 +107,22 @@ function clearForm() {
   category.value = ''
   brand.value = ''
   version.value = null
+  if(formRef.value){
+    formRef.value.resetValidation()
+  }
 
   get()
 }
 const version = ref(null)
 async function updateproduct() {
+if (!formRef.value) return
 
+  const { valid } = await formRef.value.validate()
+
+  if (!valid) {
+    toast.error('Please fill all required fields correctly')
+    return
+  }
   const product = {
   version: version.value,
   name: name.value,
@@ -206,22 +225,57 @@ const sortOptions = [
   { title: 'high to low', value: 'high' },
 ]
 
+//rules
+
+
+
+
+const rules = {
+  productName: (value) =>
+    (!!value && value.length >= 3) ||
+    'Product name must have at least 3 characters',
+
+  productPrice: (value) =>
+    Number(value) > 0 ||
+    'Price must be greater than 0',
+
+  productImage: (value) =>
+    !!value ||
+    'Image URL is required',
+
+  productDescription: (value) =>
+    (!!value && value.length >= 10) ||
+    'Description must have at least 10 characters',
+
+  productCategory: (value) =>
+    !!value ||
+    'Category is required',
+
+  productBrand: (value) =>
+    (!!value && value.length >= 2) ||
+    'Brand must have at least 2 characters',
+}
+
+
+
+
 
 
 </script>
 <template>
   <v-container>
     <h1 class="text-h4 text-center mb-6">Product Management</h1>
+    <v-form ref="formRef">
 
     <v-card class="pa-6 mb-8" elevation="3">
       <v-row>
         <!-- PRODUCT ID -->
 
         <v-col cols="12" sm="6" md="3">
-          <v-text-field v-model="id" label="Product ID" type="number" variant="outlined" hide-details required />
+          <v-text-field v-model="id" label="Product ID" type="number" variant="outlined" hide-details validate-on="blur" />
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-text-field v-model="search" label="search" prepend-inner-icon="mdi-magnify" variant="outlined" clearable />
+          <v-text-field v-model="search" label="search" prepend-inner-icon="mdi-magnify" variant="outlined" clearable  validate-on="blur" />
 
         </v-col>
 
@@ -229,34 +283,34 @@ const sortOptions = [
           <SearchBar @search="searchProduct" />
         </v-col> -->
         <v-col cols="12" sm="6" md="3">
-          <v-select v-model="sortby" label="sort by price" :items="sortOptions" variant="outlined"
+          <v-select v-model="sortby" label="sort by price" :items="sortOptions" variant="outlined" validate-on="blur"
             hide-details></v-select>
         </v-col>
 
         <!-- PRODUCT NAME -->
 
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
-          <v-text-field v-model="name" label="Product Name" variant="outlined" hide-details />
+          <v-text-field v-model="name" label="Product Name" variant="outlined"   :rules="[rules.productName]" validate-on="blur" />
         </v-col>
 
         <!-- PRODUCT PRICE -->
 
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
-          <v-text-field v-model="price" label="Product Price" type="number" prefix="₹" variant="outlined"
+          <v-text-field v-model="price" label="Product Price" type="number" prefix="₹" variant="outlined" :rules="[rules.productPrice]" validate-on="blur"
             hide-details />
         </v-col>
 
         <!-- IMAGE URL -->
 
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
-          <v-text-field v-model="image" label="Image URL" variant="outlined" hide-details />
+          <v-text-field v-model="image" label="Image URL" variant="outlined" :rules="[rules.productImage]" validate-on="blur" />
         </v-col>
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
   <v-text-field
     v-model="description"
     label="Description"
     variant="outlined"
-    hide-details
+    :rules="[rules.productDescription]" validate-on="blur"
   />
 </v-col>
 
@@ -265,7 +319,7 @@ const sortOptions = [
     v-model="category"
     label="Category"
     variant="outlined"
-    hide-details
+    :rules="[rules.productCategory]" validate-on="blur"
   />
 </v-col>
 
@@ -274,7 +328,7 @@ const sortOptions = [
     v-model="brand"
     label="Brand"
     variant="outlined"
-    hide-details
+   :rules="[rules.productBrand]" validate-on="blur"
   />
 </v-col>
       </v-row>
@@ -296,7 +350,7 @@ const sortOptions = [
         <v-btn color="secondary" variant="outlined" @click="clearForm"> Clear </v-btn>
       </div>
     </v-card>
-
+</v-form>
     <!--  //selected product -->
 
     <v-card v-if="auth.isLoggedIn && product.length !== 0" class="pa-5 mb-8 mx-auto" max-width="500" elevation="4">

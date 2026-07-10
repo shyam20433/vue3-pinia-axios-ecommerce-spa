@@ -103,4 +103,21 @@ export default class UsersController {
 
     return response.created(user)
   }
+
+
+    public async delete({ params, response }: HttpContextContract) {
+      const user = await User.find(params.id)
+
+      if (!user) {
+        return response.notFound({
+          message: 'User not found',
+        })
+      }
+
+      await user.delete()
+
+      return response.ok({
+        message: 'user removed successfully',
+      })
+    }
 }

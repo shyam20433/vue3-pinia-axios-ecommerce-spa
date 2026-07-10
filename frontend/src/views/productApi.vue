@@ -10,6 +10,10 @@ import { useAuthStore } from '@/stores/auth'
 import apiAdminControlBtn from '@/components/apiAdminControlBtn.vue'
 import { useToast } from 'vue-toastification'
 
+import { useRules } from 'vuetify/labs/rules'
+
+const rules = useRules()
+
 const toast = useToast()
 
 onMounted(() => {
@@ -216,7 +220,7 @@ const sortOptions = [
         <!-- PRODUCT NAME -->
 
         <v-col v-if="auth.isAdmin" cols="12" sm="6" md="3">
-          <v-text-field v-model="name" label="Product Name" variant="outlined" hide-details />
+          <v-text-field v-model="name" label="Product Name" variant="outlined" hide-details :rules="rules.resolve(['productName'])"/>
         </v-col>
 
         <!-- PRODUCT PRICE -->
@@ -293,7 +297,7 @@ const sortOptions = [
     <productCard :prod="prod">
 
       <template #button>
-        <v-btn 
+        <v-btn
           v-if="auth.isLoggedIn && !auth.isAdmin"
           color="primary"
           block

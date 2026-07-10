@@ -201,9 +201,16 @@ const apicall = {
     user
   )
 
+
+
   return response.data
 },
 
+async deleteUer(id){
+    const response=await api.delete(`/users/${id}`)
+    return response.data
+
+  },
 
 
   //admin calling
