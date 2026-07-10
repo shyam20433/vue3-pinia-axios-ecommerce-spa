@@ -206,7 +206,7 @@ const apicall = {
   return response.data
 },
 
-async deleteUer(id){
+async deleteUser(id){
     const response=await api.delete(`/users/${id}`)
     return response.data
 
