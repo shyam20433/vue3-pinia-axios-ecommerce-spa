@@ -24,19 +24,16 @@ export default class UpdateUserValidator {
    *    ```
    */
   public schema = schema.create({
-    username:schema.string([
+    username: schema.string.optional([
       rules.trim(),
       rules.maxLength(255)
-    ])
-    ,
-    address:schema.string([
+    ]),
+    address: schema.string.optional([
       rules.trim(),
-      rules.mobile(),
       rules.maxLength(500),
     ]),
-    phone:schema.string([
+    phone: schema.string.optional([
       rules.trim(),
-      rules.phone()
     ])
   })
 

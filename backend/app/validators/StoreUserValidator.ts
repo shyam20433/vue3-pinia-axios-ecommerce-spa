@@ -26,7 +26,7 @@ export default class StoreUserValidator {
   public schema = schema.create({
     username:schema.string([
       rules.trim(),
-      rule.maxLength(255)
+      rules.maxLength(255)
     ]),
     role:schema.string([
       rules.trim(),

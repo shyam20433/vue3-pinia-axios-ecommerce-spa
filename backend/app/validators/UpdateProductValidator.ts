@@ -25,7 +25,7 @@ export default class UpdateProductValidator {
    */
   public schema = schema.create({
     version: schema.number([
-      rules.unsigned() // Required to handle your admin concurrency check
+      rules.unsigned()
     ]),
     name: schema.string.optional([
       rules.trim(),
@@ -36,8 +36,16 @@ export default class UpdateProductValidator {
     ]),
     image: schema.string.optional([
       rules.trim(),
-      rules.url()
-    ])
+    ]),
+    description: schema.string.optional([
+      rules.trim(),
+    ]),
+    category: schema.string.optional([
+      rules.trim(),
+    ]),
+    brand: schema.string.optional([
+      rules.trim(),
+    ]),
   })
 
   /**
