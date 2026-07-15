@@ -1,10 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import Hash from '@ioc:Adonis/Core/Hash'
-export default class UsersController {
 import AdminLoginValidator from 'App/Validators/AdminLoginValidator'
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator'
 import StoreUserValidator from 'App/Validators/StoreUserValidator'
+
+export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
     try {
       const username = request.input('username')
@@ -69,7 +70,7 @@ import StoreUserValidator from 'App/Validators/StoreUserValidator'
 
       const passwordValid = await Hash.verify(
         user.password,
-        password
+        data.password
       )
 
       if (!passwordValid) {

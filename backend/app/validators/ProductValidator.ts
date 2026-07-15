@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class ProductValidator {
@@ -24,16 +24,25 @@ export default class ProductValidator {
    *    ```
    */
   public schema = schema.create({
-    name:schema.string([
-      rules.trim(),rules.maxLength(255)
+    name: schema.string([
+      rules.trim(),
+      rules.maxLength(255)
     ]),
-    price:schema.number([
+    price: schema.number([
       rules.unsigned()
     ]),
-    image:schema.string([
+    image: schema.string([
       rules.trim(),
-      rules.url()
-    ])
+    ]),
+    description: schema.string.optional([
+      rules.trim(),
+    ]),
+    category: schema.string.optional([
+      rules.trim(),
+    ]),
+    brand: schema.string.optional([
+      rules.trim(),
+    ]),
   })
 
   /**

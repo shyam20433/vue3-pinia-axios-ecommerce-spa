@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Product from 'App/Models/Product'
-import StoreProductValidator from 'App/Validators/StoreProductValidator'
+import ProductValidator from 'App/Validators/ProductValidator'
 import UpdateProductValidator from 'App/Validators/UpdateProductValidator'
 
 import Redis from '@ioc:Adonis/Addons/Redis'
@@ -61,10 +61,10 @@ export default class ProductsController {
 
   public async store({ request, response }: HttpContextContract) {
     try {
-      const data=await request.validate(ProductValidator)
-      const product = await Product.create(
-        data
-      )
+      const data = await request.validate(ProductValidator)
+      const product = await Product.create(data)
+
+      await Redis.del('all_products')
 
       return response.created(product)
     } catch (error) {
@@ -77,27 +77,36 @@ export default class ProductsController {
 
   public async update({ params, request, response }: HttpContextContract) {
     try {
-      const product = await Product.find(params.id).validate(UpdateProductValidator)
+      const product = await Product.find(params.id)
 
       if (!product) {
         return response.notFound({
           message: 'Product not found',
         })
       }
-      const requestversion = request.input('version')
 
-      product.merge(
-        request.only(['name', 'price', 'image'])
-      )
-      if (product.version !== requestversion) {
+      const data = await request.validate(UpdateProductValidator)
+      const requestVersion = data.version
+
+      if (product.version !== requestVersion) {
         return response.conflict({
-          message: "Product was modifying by another admin !",
-          currentVersion: product.version
+          message: 'Product was modified by another admin!',
+          currentVersion: product.version,
         })
       }
+
+      product.merge({
+        name: data.name,
+        price: data.price,
+        image: data.image,
+        description: data.description,
+        category: data.category,
+        brand: data.brand,
+        version: product.version + 1,
+      })
+
       await product.save()
-      product.version += 1
-      await product.save()
+      await Redis.del('all_products')
 
       return product
     } catch (error) {
@@ -119,6 +128,7 @@ export default class ProductsController {
       }
 
       await product.delete()
+      await Redis.del('all_products')
 
       return response.ok({
         message: 'Product deleted successfully',
