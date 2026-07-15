@@ -2,23 +2,21 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class Admin {
   public async handle(
-    { auth, response }: HttpContextContract,
+    { request, response }: HttpContextContract,
     next: () => Promise<void>
   ) {
-    const user = auth.use('api').user
+    // 1. Grab the decoded token data from the request
+    // @ts-ignore
+    const user = request.jwtData
 
-    if (!user) {
-      return response.unauthorized({
-        message: 'Invalid token',
-      })
-    }
-
-    if (user.role !== 'admin') {
+    // 2. Make sure the user exists and actually has the admin role
+    if (!user || user.role !== 'admin') {
       return response.forbidden({
         message: 'Admin access required',
       })
     }
 
+    // 3. They are an admin! Let the request proceed to the controller.
     await next()
   }
 }

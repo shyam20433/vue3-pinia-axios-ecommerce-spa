@@ -81,8 +81,7 @@ async function adduser() {
     toast.error('Something went wrong.')
     console.log(error)
   }
-}
-async function addadmin() {
+}async function addadmin() {
   if (!formRef.value) {
     toast.error('Form not found!')
     return
@@ -90,33 +89,31 @@ async function addadmin() {
   const { valid } = await formRef.value.validate()
   if (!valid) { return }
 
-
   try {
     const data = await apicall.adminLogin({
       username: name.value.trim(),
       password: password.value
     })
-    console.log('ORIGINAL TOKEN:', data.token.token)
 
-    localStorage.setItem('adminToken', data.token.token)
+    // ✅ FIXED: Axios response interceptor already handles saving the token to storage!
+    // We just save the user info and log them into the Pinia state.
     localStorage.setItem('currentUser', JSON.stringify(data.user))
 
-    console.log(
-      'SAVED TOKEN:',
-      localStorage.getItem('adminToken')
-    )
     auth.login(data.user)
     toast.success('Admin logged in successfully!')
+
     name.value = ''
     password.value = ''
     formRef.value.resetValidation()
+
+    // Redirect admin to the products view
+    return router.push('/productapi')
   } catch (error) {
     console.log('FULL ERROR:', error)
     console.log('STATUS:', error.response?.status)
     console.log('BACKEND RESPONSE:', error.response?.data)
     toast.error(error.response?.data?.message || 'Admin login failed.')
   }
-
 
 
 

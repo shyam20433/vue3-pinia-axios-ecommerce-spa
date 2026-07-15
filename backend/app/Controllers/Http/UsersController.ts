@@ -4,6 +4,8 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import AdminLoginValidator from 'App/Validators/AdminLoginValidator'
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator'
 import StoreUserValidator from 'App/Validators/StoreUserValidator'
+import jwt from 'jsonwebtoken'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -85,7 +87,11 @@ export default class UsersController {
         })
       }
 
-      const token = await auth.use('api').generate(user)
+      const token = jwt.sign(
+        { userId: user.id, role: user.role },
+        Env.get('APP_KEY'),
+        { expiresIn: '2h' } // Token expires in 2 hours
+      )
 
       return {
         user,
